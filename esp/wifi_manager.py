@@ -2,7 +2,7 @@ import network
 import socket
 import ure
 import time
-import config
+import yaml
 
 
 NETWORK_PROFILES = 'wifi.dat'
@@ -61,25 +61,23 @@ def get_connection():
     return wlan_sta if connected else None
 
 
-def read_profiles():
-    # TODO
-    # check if the file exist
-    # check if the file is not empty
-    with open(NETWORK_PROFILES) as f:
-        lines = f.readlines()
-    profiles = {}
-    for line in lines:
-        ssid, password = line.strip("\n").split(";")
-        profiles[ssid] = password
-    return profiles
+def read_profiles() -> dict:
+    # TODO check if the file exist
+    # TODO check if the file is not empty
+    # TODO check if the key exist
+    with open('config.yaml') as f:
+        profiles = yaml.load(f.read())
+    return profiles['wifi']
 
 
-def write_profiles(profiles):
-    lines = []
-    for ssid, password in profiles.items():
-        lines.append("%s;%s\n" % (ssid, password))
-    with open(NETWORK_PROFILES, "w") as f:
-        f.write(''.join(lines))
+def write_profiles(ssid: str, password: str) -> None:
+    with open('config.yaml') as f:
+        profiles = yaml.load(f.read())
+
+    profiles['wifi'][ssid] = password
+
+    with open('config.yaml', 'w') as f:
+        f.write(yaml.dump(profiles, default_flow_style=False))
 
 
 def do_connect(ssid, password):
@@ -203,9 +201,9 @@ def handle_configure(client, request):
         try:
             profiles = read_profiles()
         except OSError:
-            profiles = {}
-        profiles[ssid] = password
-        write_profiles(profiles)
+            # profiles = (ssid, password)
+        # profiles[ssid] = password
+        write_profiles(ssid, password)
 
         time.sleep(5)
 

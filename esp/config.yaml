@@ -1,0 +1,19 @@
+ap:
+  auth: '3'
+  pswd: '1223334444'
+  ssid: ubinascii.hexlify(machine.unique_id()).decode()
+mqtt:
+  port: '12487'
+  pswd: M0D6C8lfFRGG
+  pub_topic: !!binary |
+    VGVzdA==
+  server: farmer.cloudmqtt.com
+  sub_topic: !!binary |
+    VGVzdA==
+  user: lxzvqebd
+wifi:
+  badam: tsss
+  bibi: didi
+  bobo: dodo
+  good2best: young-family
+  trololo: bombom

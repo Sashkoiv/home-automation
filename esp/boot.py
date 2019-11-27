@@ -4,7 +4,6 @@ import micropython
 import network
 import esp
 import gc
-from config import WIFI_SSID, WIFI_PSWD
 import wifi_manager
 
 esp.osdebug(None)
@@ -28,6 +27,7 @@ if wlan is None:
         pass
 
 # ------- OLD WAY OF CONNECTION ------- #
+# from config import WIFI_SSID, WIFI_PSWD
 # station = network.WLAN(network.STA_IF)
 
 # station.active(True)
