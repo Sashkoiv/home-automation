@@ -1,0 +1,22 @@
+{
+    "ap": {
+        "auth": "3",
+        "pswd": "1223334444",
+        "ssid": "LebidSchuka&Rak"
+    },
+    "mqtt": {
+        "port": "12487",
+        "pswd": "M0D6C8lfFRGG",
+        "pub_topic": "Test",
+        "server": "farmer.cloudmqtt.com",
+        "sub_topic": "Test",
+        "user": "lxzvqebd"
+    },
+    "wifi": {
+        "badam": "tsss",
+        "bibi": "didi",
+        "bobo": "dodo",
+        "young-family": "good2best",
+        "trololo": "bombom"
+    }
+}

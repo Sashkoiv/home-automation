@@ -1,7 +1,7 @@
 ap:
   auth: '3'
   pswd: '1223334444'
-  ssid: ubinascii.hexlify(machine.unique_id()).decode()
+  ssid: 'LebidSchuka&Rak'
 mqtt:
   port: '12487'
   pswd: M0D6C8lfFRGG
@@ -15,5 +15,5 @@ wifi:
   badam: tsss
   bibi: didi
   bobo: dodo
-  good2best: young-family
+  young-family: good2best
   trololo: bombom

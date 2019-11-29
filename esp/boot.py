@@ -1,10 +1,9 @@
-import ubinascii
 import machine
 import micropython
-import network
+# # import network
 import esp
 import gc
-import wifi_manager
+import wifi_mngr
 
 esp.osdebug(None)
 gc.collect()
@@ -18,8 +17,8 @@ last_message = 0
 message_interval = 5
 counter = 0
 
-# ------- NEW WAY OF CONNECTION ------- #
-wlan = wifi_manager.get_connection()
+# ---- ADVANCED WAY OF CONNECTION ----- #
+wlan = wifi_mngr.get_connection()
 if wlan is None:
     print("Could not initialize the network connection.")
     # TODO possibility to reconnect to eliminate endless loop

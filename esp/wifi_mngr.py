@@ -1,15 +1,19 @@
+import machine
+import ubinascii
 import network
 import socket
 import ure
 import time
-import yaml
+import json
+# import yaml
+# from boot import CONFIGFILE
 
+# CONFIG = 'config.yaml'
+CONFIGFILE = 'config.json'
 
-NETWORK_PROFILES = 'wifi.dat'
 
 wlan_ap = network.WLAN(network.AP_IF)
 wlan_sta = network.WLAN(network.STA_IF)
-
 server_socket = None
 
 
@@ -34,11 +38,14 @@ def get_connection():
         wlan_sta.active(True)
         networks = wlan_sta.scan()
 
-        AUTHMODE = {0: "open", 1: "WEP", 2: "WPA-PSK", 3: "WPA2-PSK", 4: "WPA/WPA2-PSK"}
-        for ssid, bssid, channel, rssi, authmode, hidden in sorted(networks, key=lambda x: x[3], reverse=True):
+        AUTHMODE = {0: "open", 1: "WEP", 2: "WPA-PSK",
+                    3: "WPA2-PSK", 4: "WPA/WPA2-PSK"}
+        for ssid, bssid, channel, rssi, authmode, \
+                hidden in sorted(networks, key=lambda x: x[3], reverse=True):
             ssid = ssid.decode('utf-8')
             encrypted = authmode > 0
-            print("ssid: %s chan: %d rssi: %d authmode: %s" % (ssid, channel, rssi, AUTHMODE.get(authmode, '?')))
+            print("ssid: %s chan: %d rssi: %d authmode: %s" %
+                  (ssid, channel, rssi, AUTHMODE.get(authmode, '?')))
             if encrypted:
                 if ssid in profiles:
                     password = profiles[ssid]
@@ -65,19 +72,27 @@ def read_profiles() -> dict:
     # TODO check if the file exist
     # TODO check if the file is not empty
     # TODO check if the key exist
-    with open('config.yaml') as f:
-        profiles = yaml.load(f.read())
+
+    # with open(CONFIG) as f:
+        # profiles = yaml.load(f.read())
+    with open(CONFIGFILE) as f:
+        profiles = json.load(f)
+
     return profiles['wifi']
 
 
 def write_profiles(ssid: str, password: str) -> None:
-    with open('config.yaml') as f:
-        profiles = yaml.load(f.read())
+    # with open(CONFIG) as f:
+        # profiles = yaml.load(f.read())
+    with open(CONFIGFILE) as f:
+        profiles = json.load(f)
 
     profiles['wifi'][ssid] = password
 
-    with open('config.yaml', 'w') as f:
-        f.write(yaml.dump(profiles, default_flow_style=False))
+    # with open(CONFIG, 'w') as f:
+    #     f.write(yaml.dump(profiles, default_flow_style=False))
+    with open(CONFIGFILE, 'w') as f:
+        f.write(json.dumps(profiles))
 
 
 def do_connect(ssid, password):
@@ -99,11 +114,11 @@ def do_connect(ssid, password):
     return connected
 
 
-def send_header(client, status_code=200, content_length=None ):
+def send_header(client, status_code=200, content_length=None):
     client.sendall("HTTP/1.0 {} OK\r\n".format(status_code))
     client.sendall("Content-Type: text/html\r\n")
     if content_length is not None:
-      client.sendall("Content-Length: {}\r\n".format(content_length))
+        client.sendall("Content-Length: {}\r\n".format(content_length))
     client.sendall("\r\n")
 
 
@@ -161,7 +176,7 @@ def handle_root(client):
             </h5>
             <hr />
         </html>
-    """ % dict(filename=NETWORK_PROFILES))
+    """ % dict(filename=CONFIGFILE))
     client.close()
 
 
@@ -173,8 +188,10 @@ def handle_configure(client, request):
         return False
     # version 1.9 compatibility
     try:
-        ssid = match.group(1).decode("utf-8").replace("%3F", "?").replace("%21", "!")
-        password = match.group(2).decode("utf-8").replace("%3F", "?").replace("%21", "!")
+        ssid = match.group(1).decode(
+            "utf-8").replace("%3F", "?").replace("%21", "!")
+        password = match.group(2).decode(
+            "utf-8").replace("%3F", "?").replace("%21", "!")
     except Exception:
         ssid = match.group(1).replace("%3F", "?").replace("%21", "!")
         password = match.group(2).replace("%3F", "?").replace("%21", "!")
@@ -201,8 +218,8 @@ def handle_configure(client, request):
         try:
             profiles = read_profiles()
         except OSError:
-            # profiles = (ssid, password)
-        # profiles[ssid] = password
+            profiles = {}
+
         write_profiles(ssid, password)
 
         time.sleep(5)
@@ -250,13 +267,25 @@ def start(port=80):
     wlan_sta.active(True)
     wlan_ap.active(True)
 
-    wlan_ap.config(essid=config.AP_SSID, password=config.AP_PSWD, authmode=config.AP_AUTH)
+    # with open(CONFIG) as f:
+    #     AP = yaml.load(f.read())['ap']
+    with open(CONFIGFILE) as f:
+        AP = json.load(f)['ap']
+
+    essid = '{}-{}'.format(AP['ssid'],
+                           ubinascii.hexlify(machine.unique_id()).decode())
+
+    wlan_ap.config(
+        essid=essid,
+        password=AP['pswd'],
+        authmode=int(AP['auth']))
 
     server_socket = socket.socket()
     server_socket.bind(addr)
     server_socket.listen(1)
 
-    print('Connect to WiFi ssid ' + config.AP_SSID + ', default password: ' + config.AP_PSWD)
+    print('Connect to WiFi ssid ' + essid +
+          ', default password: ' + AP['pswd'])
     print('and access the ESP via your favorite web browser at 192.168.4.1.')
     print('Listening on:', addr)
 
@@ -282,9 +311,11 @@ def start(port=80):
 
             # version 1.9 compatibility
             try:
-                url = ure.search("(?:GET|POST) /(.*?)(?:\\?.*?)? HTTP", request).group(1).decode("utf-8").rstrip("/")
+                url = ure.search("(?:GET|POST) /(.*?)(?:\\?.*?)? HTTP",
+                                 request).group(1).decode("utf-8").rstrip("/")
             except Exception:
-                url = ure.search("(?:GET|POST) /(.*?)(?:\\?.*?)? HTTP", request).group(1).rstrip("/")
+                url = ure.search(
+                    "(?:GET|POST) /(.*?)(?:\\?.*?)? HTTP", request).group(1).rstrip("/")
             print("URL is {}".format(url))
 
             if url == "":

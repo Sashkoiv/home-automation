@@ -12,8 +12,14 @@ class MQTTException(Exception):
 
 class MQTTClient:
 
-    def __init__(self, client_id, server, port=0, user=None, password=None, keepalive=0,
-                 ssl=False, ssl_params={}):
+    def __init__(self,
+                 client_id,
+                 server, port=0,
+                 user=None,
+                 password=None,
+                 keepalive=0,
+                 ssl=False,
+                 ssl_params={}):
         if port == 0:
             port = 8883 if ssl else 1883
         self.client_id = client_id
@@ -159,7 +165,7 @@ class MQTTClient:
             op = self.wait_msg()
             if op == 0x90:
                 resp = self.sock.read(4)
-                #print(resp)
+                # print(resp)
                 assert resp[1] == pkt[2] and resp[2] == pkt[3]
                 if resp[3] == 0x80:
                     raise MQTTException(resp[3])
