@@ -4,6 +4,7 @@ import ubinascii
 # import yaml
 import json
 from umqttsimple import MQTTClient
+import lm75a
 from boot import last_message, message_interval, counter
 
 CONFIGFILE = 'config.json'
@@ -57,12 +58,18 @@ except OSError as e:
     restart_and_reconnect()
 
 while True:
+    try:
+        temp = lm75a.getTemp(72, 22, 21)
+    except:
+        temp = -100500
 
     try:
         client.check_msg()
         # Publish routine
         if (time.time() - last_message) > message_interval:
-            msg = b'Hello #%d' % counter
+
+            msg = 'msg #{}\ntemp {}'.format(counter, temp)
+
             client.publish(config['pub_topic'], msg)
             last_message = time.time()
             counter += 1
