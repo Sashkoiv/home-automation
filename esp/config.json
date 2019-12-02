@@ -13,10 +13,25 @@
         "user": "lxzvqebd"
     },
     "wifi": {
-        "badam": "tsss",
-        "bibi": "didi",
-        "bobo": "dodo",
-        "young-family": "good2best",
-        "trololo": "bombom"
+        "young-family": "good2best"
+    },
+    "intf": {
+        "i2c": {
+            "sda": 21,
+            "scl": 22
+        },
+        "uart0": {
+            "rx": 3,
+            "tx": 1
+        },
+        "uart2": {
+            "rx": 16,
+            "tx": 17
+        }
+    },
+    "perif": {
+        "lm75a": {
+            "addr": 72
+        }
     }
 }

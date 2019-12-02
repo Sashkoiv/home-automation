@@ -5,18 +5,22 @@ import ubinascii
 import json
 from umqttsimple import MQTTClient
 import lm75a
-from boot import last_message, message_interval, counter
+
 
 CONFIGFILE = 'config.json'
-
+led = machine.Pin(2, machine.Pin.OUT, value=1)
+last_message = 0
+message_interval = 5
+counter = 0
 
 # with open('CONFIG') as f:
 #     config = yaml.load(f.read())['mqtt']
 with open(CONFIGFILE) as f:
-    config = json.load(f)['mqtt']
-
-
-led = machine.Pin(2, machine.Pin.OUT, value=1)
+    raw = json.load(f)
+    config = raw['mqtt']
+    lm_sensor = [raw['perif']['lm75a']['addr'],
+                 raw['intf']['i2c']['scl'],
+                 raw['intf']['i2c']['sda']]
 
 
 def sub_cb(topic, msg):
@@ -59,7 +63,7 @@ except OSError as e:
 
 while True:
     try:
-        temp = lm75a.getTemp(72, 22, 21)
+        temp = lm75a.getTemp(*lm_sensor)
     except:
         temp = -100500
 

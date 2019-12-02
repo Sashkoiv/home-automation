@@ -13,10 +13,6 @@ if machine.reset_cause() == machine.DEEPSLEEP_RESET:
 else:
     print('power on or hard reset')
 
-last_message = 0
-message_interval = 5
-counter = 0
-
 # ---- ADVANCED WAY OF CONNECTION ----- #
 wlan = wifi_mngr.get_connection()
 if wlan is None:
