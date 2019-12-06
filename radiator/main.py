@@ -1,6 +1,7 @@
 import time
 import machine
 import ubinascii
+# import yaml
 import json
 from umqttsimple import MQTTClient
 import lm75a
@@ -10,15 +11,13 @@ CONFIGFILE = 'config.json'
 treshold = 28.0
 last_message = 0
 message_interval = 5
+counter = 0
 
-# recover previous status after reboot
-with open('last_status.txt')as f:
-    led_v, relay_v = f.read().split('<&>')
+led = machine.Pin(2, machine.Pin.OUT, value=1)
+relay = machine.Pin(12, machine.Pin.OUT, value=0)
 
-# initualize GPIO with before-reboot status
-led = machine.Pin(2, machine.Pin.OUT, value=led_v)
-relay = machine.Pin(12, machine.Pin.OUT, value=relay_v)
-
+# with open('CONFIG') as f:
+#     config = yaml.load(f.read())['mqtt']
 with open(CONFIGFILE) as f:
     raw = json.load(f)
     config = raw['mqtt']
@@ -27,8 +26,10 @@ with open(CONFIGFILE) as f:
                  raw['intf']['i2c']['sda']]
 
 
-def sub_cb(topic: str, msg: str) -> None:
+def sub_cb(topic, msg):
     if topic == config['sub_topic'].encode():
+        # led.value(not p.value())
+        print(msg)
 
         if msg.decode() == '1':
             led.value(0)
@@ -37,7 +38,7 @@ def sub_cb(topic: str, msg: str) -> None:
             led.value(1)
             relay.value(0)
         else:
-            temp = float(msg.decode())
+            temp = float(msg.decode().split('\n')[1].split(' ')[1])
             print(temp)
             if temp < treshold:
                 led.value(0)
@@ -48,8 +49,7 @@ def sub_cb(topic: str, msg: str) -> None:
             else:
                 print('Incorrect message -> '.format(msg))
 
-    with open('last_status.txt', 'w')as f:
-        f.write('{}<&>{}'.format(led.value(), relay.value()))
+
 
 
 def connect_and_subscribe():
@@ -77,7 +77,6 @@ def restart_and_reconnect():
 try:
     client = connect_and_subscribe()
 except OSError as e:
-    print('Exception occured \n{}'.format(e))
     restart_and_reconnect()
 
 while True:
@@ -90,10 +89,12 @@ while True:
         client.check_msg()
         # Publish routine
         if (time.time() - last_message) > message_interval:
-            if temp:
-                msg = str(temp)
-            else:
-                msg = client.publish(config['pub_topic'], msg)
+
+            if temp != None:
+                msg = 'msg #{}\ntemp {}'.format(counter, temp)
+
+                client.publish(config['pub_topic'], msg)
                 last_message = time.time()
+                counter += 1
     except OSError as e:
         restart_and_reconnect()

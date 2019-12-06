@@ -2,19 +2,19 @@
     "ap": {
         "auth": "3",
         "pswd": "1223334444",
-        "ssid": "LebidSchuka&Rak"
+        "ssid": "Radiator"
     },
     "mqtt": {
         "port": 12487,
         "pswd": "M0D6C8lfFRGG",
-        "pub_topic": "Test",
+        "pub_topic": "Radiator",
         "server": "farmer.cloudmqtt.com",
-        "sub_topic": "Test",
+        "sub_topic": "Radiator",
         "user": "lxzvqebd"
     },
     "wifi": {
-        "young-family": "good2best",
-        "workshop": "uzvarthebest"
+        "workshop": "uzvarthebest",
+        "young-family": "good2best"
     },
     "intf": {
         "i2c": {
