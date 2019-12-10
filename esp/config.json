@@ -7,14 +7,14 @@
     "mqtt": {
         "port": 12487,
         "pswd": "M0D6C8lfFRGG",
-        "pub_topic": "Test",
+        "pub_topic": "Radiator",
         "server": "farmer.cloudmqtt.com",
-        "sub_topic": "Test",
+        "sub_topic": "Radiator",
         "user": "lxzvqebd"
     },
     "wifi": {
         "young-family": "good2best",
-        "workshop": "uzvarthebest"
+        "workshop": "05071175"
     },
     "intf": {
         "i2c": {
